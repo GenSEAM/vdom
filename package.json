@@ -1,16 +1,21 @@
 {
   "name": "@genseam/asl-vdom",
-  "version": "0.1.0",
-  "description": "Declarative S-Expression Virtual DOM & Dual Perception Compactor (AXTree + D2Snap DOM Downsampling) in AgentScript",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Declarative S-Expression Virtual DOM, Polyglot UI Transpiler & Dual Perception Compactor in AgentScript",
   "main": "src/vdom.asl",
   "module": "bridges/ts/index.ts",
   "types": "bridges/ts/index.ts",
   "exports": {
     ".": "./bridges/ts/index.ts",
-    "./perception": "./bridges/ts/perception.ts"
+    "./perception": "./bridges/ts/perception.ts",
+    "./transpiler": "./bridges/transpiler.js",
+    "./reactor": "./bridges/wasm_reactor.js"
   },
   "scripts": {
-    "test": "python3 ../../agentscript test tests/vdom_test.asl",
+    "test": "node --test tests/polyglot_ui.test.js && node ../asl/bin/asl gate src/vdom.asl src/html.asl src/emit_jsx.asl src/polyglot.asl",
+    "test:polyglot": "node --test tests/polyglot_ui.test.js",
+    "test:reactor": "node --test tests/wasm_reactor.test.js",
     "test:bridge": "npx tsx tests/perception_test.ts",
     "typecheck": "tsc --noEmit bridges/ts/index.ts"
   },
