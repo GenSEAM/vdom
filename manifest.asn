@@ -1,0 +1,5 @@
+(:package @genseam/asl-vdom
+ :version "0.1.0"
+ :entry "src/vdom.asl"
+ :description "Dual perception AXTree downsampling and reactive virtual DOM engine"
+ :dependencies [])
