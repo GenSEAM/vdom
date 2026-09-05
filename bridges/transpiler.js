@@ -11,6 +11,111 @@ export const VOID_TAGS = new Set([
   "input", "img", "br", "hr", "meta", "link", "area", "base", "col", "embed", "source", "track", "wbr"
 ]);
 
+export function parseAslSExpr(text) {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("(") && !trimmed.startsWith("<")) {
+    return { type: "text", text: trimmed };
+  }
+
+  let targetText = trimmed;
+  if (trimmed.startsWith("(module")) {
+    const match = trimmed.match(/\((div|section|header|footer|main|nav|card|span|p|h1|h2|h3|button|form)\b[\s\S]*\)/);
+    if (match) {
+      targetText = match[0];
+    }
+  }
+
+  const tokens = [];
+  let i = 0;
+  while (i < targetText.length) {
+    const ch = targetText[i];
+    if (/\s/.test(ch)) {
+      i++;
+    } else if (ch === "(" || ch === ")") {
+      tokens.push(ch);
+      i++;
+    } else if (ch === '"') {
+      let str = "";
+      i++;
+      while (i < targetText.length && targetText[i] !== '"') {
+        if (targetText[i] === '\\' && i + 1 < targetText.length) {
+          str += targetText[i + 1];
+          i += 2;
+        } else {
+          str += targetText[i];
+          i++;
+        }
+      }
+      i++;
+      tokens.push({ type: "str", val: str });
+    } else {
+      let sym = "";
+      while (i < targetText.length && !/[\s()]/.test(targetText[i])) {
+        sym += targetText[i];
+        i++;
+      }
+      tokens.push({ type: "sym", val: sym });
+    }
+  }
+
+  let pos = 0;
+  function parseExpr() {
+    if (pos >= tokens.length) return null;
+    const tok = tokens[pos++];
+    if (tok === "(") {
+      if (pos >= tokens.length) return null;
+      const head = tokens[pos++];
+      const tag = (typeof head === "object" && head.type === "sym") ? head.val : "div";
+      const attrs = {};
+      const children = [];
+
+      while (pos < tokens.length && tokens[pos] !== ")") {
+        const next = tokens[pos];
+        if (next === "(") {
+          if (pos + 1 < tokens.length && tokens[pos + 1]?.val?.startsWith(":")) {
+            pos++;
+            const attrKey = tokens[pos++].val.replace(/^:/, "");
+            let attrVal = "";
+            if (pos < tokens.length && tokens[pos] !== ")") {
+              const v = tokens[pos++];
+              attrVal = typeof v === "object" ? v.val : String(v);
+            }
+            if (pos < tokens.length && tokens[pos] === ")") pos++;
+            attrs[attrKey] = attrVal;
+          } else {
+            const child = parseExpr();
+            if (child) children.push(child);
+          }
+        } else if (typeof next === "object") {
+          pos++;
+          if (next.type === "str") {
+            children.push({ type: "text", text: next.val });
+          } else if (next.val.startsWith(":")) {
+            const k = next.val.replace(/^:/, "");
+            let v = "";
+            if (pos < tokens.length && tokens[pos]?.type === "str") {
+              v = tokens[pos++].val;
+            }
+            attrs[k] = v;
+          } else {
+            children.push({ type: "text", text: next.val });
+          }
+        } else {
+          pos++;
+        }
+      }
+      if (pos < tokens.length && tokens[pos] === ")") pos++;
+      return { type: "element", tag, attrs, children };
+    } else if (typeof tok === "object") {
+      return { type: "text", text: tok.val };
+    }
+    return null;
+  }
+
+  const parsed = parseExpr();
+  return parsed || { type: "text", text: trimmed };
+}
+
 /**
  * Parses an S-expression or JSON representation into a normalized VNode tree.
  */
@@ -18,7 +123,13 @@ export function normalizeVNode(node) {
   if (node === null || node === undefined) {
     return { type: "text", text: "" };
   }
-  if (typeof node === "string" || typeof node === "number" || typeof node === "boolean") {
+  if (typeof node === "string") {
+    if (node.trim().startsWith("(")) {
+      return parseAslSExpr(node);
+    }
+    return { type: "text", text: node };
+  }
+  if (typeof node === "number" || typeof node === "boolean") {
     return { type: "text", text: String(node) };
   }
   if (node.type === "text" || node.text !== undefined) {

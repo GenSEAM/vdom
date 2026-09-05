@@ -140,3 +140,20 @@ test("Universal Polyglot UI Transpiler - Void Elements & Attributes", () => {
   assert.match(ssrForm, /<input type="text" placeholder="Agent Query" name="query" \/>/);
   assert.match(ssrForm, /<img src="\/logo.svg" alt="ASL Logo" \/>/);
 });
+
+test("Universal Polyglot UI Transpiler - Declarative S-Expression ASL Syntax", () => {
+  const aslSExpr = `(div (:class "hero-card") (h1 "AgentScript") (p "Sub-millisecond Wasm"))`;
+  const reactOut = compileToReact(aslSExpr);
+  assert.match(reactOut, /className="hero-card"/);
+  assert.match(reactOut, /<h1>AgentScript<\/h1>/);
+  assert.match(reactOut, /<p>Sub-millisecond Wasm<\/p>/);
+
+  const vueOut = compileToVue(aslSExpr);
+  assert.match(vueOut, /class="hero-card"/);
+  assert.match(vueOut, /<h1>AgentScript<\/h1>/);
+
+  const svelteOut = compileToSvelte(aslSExpr);
+  assert.match(svelteOut, /class="hero-card"/);
+  assert.match(svelteOut, /<h1>AgentScript<\/h1>/);
+});
+
