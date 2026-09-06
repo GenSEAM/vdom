@@ -4,9 +4,9 @@
       attrs-empty attr attr-class attr-id attr-type attr-value attr-name attr-placeholder attr-href attr-src attr-alt
       attrs-of with-attr with-class
       div span p h1 h2 h3 button input form card header footer
-      d s b txt
+      d s b btn txt t el c comp
       div-plain span-plain p-plain h1-plain h2-plain h3-plain button-plain form-plain card-plain header-plain footer-plain
-      d-plain s-plain b-plain]
+      d-plain s-plain b-plain btn-plain el-plain c-plain comp-plain]
   :i [(vdom :a v)])
 
 (dfs Props
@@ -88,6 +88,10 @@
   :d "Adds or sets class attribute in a map"
   (map-set attrs "class" cls))
 
+(df t [(content String)] -> v/VNode
+  :d "Ultra-compact text node constructor"
+  (v/t content))
+
 (df txt [(content String)] -> v/VNode
   :d "Compact alias for vdom text node"
   (v/text content))
@@ -152,6 +156,22 @@
   :d "Compact alias for button"
   (v/elem "button" attrs children))
 
+(df btn [(attrs (Map String String)) (children (List v/VNode))] -> v/VNode
+  :d "Compact alias for button"
+  (v/elem "button" attrs children))
+
+(df el [(tag String) (attrs (Map String String)) (children (List v/VNode))] -> v/VNode
+  :d "Compact element constructor"
+  (v/el tag attrs children))
+
+(df c [(name String) (props (Map String String)) (children (List v/VNode))] -> v/VNode
+  :d "Compact component constructor"
+  (v/c name props children))
+
+(df comp [(name String) (props (Map String String)) (children (List v/VNode))] -> v/VNode
+  :d "Component constructor with props and children"
+  (v/comp name props children))
+
 (df div-plain [(children (List v/VNode))] -> v/VNode
   :d "Constructs a div VNode with empty attributes"
   (v/elem "div" (map-empty) children))
@@ -207,3 +227,19 @@
 (df b-plain [(children (List v/VNode))] -> v/VNode
   :d "Compact alias for button-plain"
   (v/elem "button" (map-empty) children))
+
+(df btn-plain [(children (List v/VNode))] -> v/VNode
+  :d "Compact alias for button-plain"
+  (v/elem "button" (map-empty) children))
+
+(df el-plain [(tag String) (children (List v/VNode))] -> v/VNode
+  :d "Compact element constructor without attributes"
+  (v/el-plain tag children))
+
+(df c-plain [(name String) (children (List v/VNode))] -> v/VNode
+  :d "Compact component constructor without props"
+  (v/c-plain name children))
+
+(df comp-plain [(name String) (children (List v/VNode))] -> v/VNode
+  :d "Component constructor without props"
+  (v/comp-plain name children))

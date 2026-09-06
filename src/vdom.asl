@@ -1,7 +1,9 @@
 (module asl-vdom/vdom
   :d "Declarative S-Expression Virtual DOM and Dual Perception Compactor in ASL"
   :x [VNode AXNode MutationRecord DomDiff
-      text elem elem-plain is-valid-node
+      t txt text elem el elem-plain el-plain
+      comp c comp-plain c-plain
+      is-valid-node is-component-tag? vnode-is-comp? vnode-attrs
       vnode-tag vnode-text vnode-children
       make-ax-node ax-leaf
       is-retained-attr? filter-attributes should-prune-tag? is-redundant-wrapper?
@@ -34,17 +36,68 @@
   (:f removed (List String) "Removed element selectors or refs")
   (:f mutated (List MutationRecord) "Modified node records"))
 
+(df t [(content String)] -> VNode
+  :d "Creates an ultra-compact text VNode"
+  (text-node content))
+
+(df txt [(content String)] -> VNode
+  :d "Creates a text VNode (alias for t)"
+  (text-node content))
+
 (df text [(content String)] -> VNode
   :d "Creates a text VNode"
   (text-node content))
+
+(df el [(tag String) (attrs (Map String String)) (children (List VNode))] -> VNode
+  :d "Creates a compact element VNode with explicit attributes and children"
+  (element-node tag attrs children))
 
 (df elem [(tag String) (attrs (Map String String)) (children (List VNode))] -> VNode
   :d "Creates an element VNode with explicit attributes and children"
   (element-node tag attrs children))
 
+(df el-plain [(tag String) (children (List VNode))] -> VNode
+  :d "Creates a compact element VNode with empty attributes"
+  (element-node tag (map-empty) children))
+
 (df elem-plain [(tag String) (children (List VNode))] -> VNode
   :d "Creates an element VNode with empty attributes and given children"
   (element-node tag (map-empty) children))
+
+(df comp [(name String) (props (Map String String)) (children (List VNode))] -> VNode
+  :d "Creates a custom component VNode with props and children"
+  (element-node name props children))
+
+(df c [(name String) (props (Map String String)) (children (List VNode))] -> VNode
+  :d "Creates a compact component VNode (alias for comp)"
+  (element-node name props children))
+
+(df comp-plain [(name String) (children (List VNode))] -> VNode
+  :d "Creates a custom component VNode with empty props"
+  (element-node name (map-empty) children))
+
+(df c-plain [(name String) (children (List VNode))] -> VNode
+  :d "Creates a compact component VNode with empty props"
+  (element-node name (map-empty) children))
+
+(df is-component-tag? [(tag String)] -> Bool
+  :d "Checks if tag represents a custom React component (uppercase first character)"
+  (if (string-empty? tag)
+      false
+      (let [(first-ch (option-or (string-slice tag 0 1) ""))]
+        (and (>= first-ch "A") (<= first-ch "Z")))))
+
+(df vnode-is-comp? [(node VNode)] -> Bool
+  :d "Checks if a VNode represents a custom component rather than a native HTML element"
+  (mt node
+    ((text-node _) false)
+    ((element-node tag _ _) (is-component-tag? tag))))
+
+(df vnode-attrs [(node VNode)] -> (Map String String)
+  :d "Returns the attributes or props map of an element VNode, or empty map for text nodes"
+  (mt node
+    ((text-node _) (map-empty))
+    ((element-node _ attrs _) attrs)))
 
 (df is-valid-node [(node VNode)] -> Bool
   :d "Validates that a VNode has non-empty tag or content"

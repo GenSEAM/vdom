@@ -6,8 +6,10 @@
       test-downsampling-prunes-scripts-and-styles
       test-downsampling-filter-attributes
       test-downsampling-collapses-wrappers
-      test-dom-diff-added-removed-mutated]
-  :i [(vdom :a v)])
+      test-dom-diff-added-removed-mutated
+      test-compact-nodes
+      test-component-jsx-emission]
+  :i [(vdom :a v) (html :a h) (emit-jsx :a j)])
 
 "run: (run-tests)"
 
@@ -101,6 +103,31 @@
               (and (> (list-length (.-mutated diff)) 0)
                    (string-contains? frame "(! dom/diff :route \"/settings\""))))))
 
+(df test-compact-nodes [] -> Bool
+  :d "Verifies ultra-compact t, el, btn, c, comp constructors and predicates"
+  (let [(txt-node (v/t "AgentScript"))
+        (btn-node (h/btn (h/attrs-of (list (h/attr-id "b1"))) (list txt-node)))
+        (comp-node (h/c "Card" (h/attrs-of (list (h/attr-class "p-4"))) (list btn-node)))
+        (comp-plain (h/c-plain "Hero" (list txt-node)))]
+    (and (v/is-valid-node txt-node)
+         (and (= (v/vnode-text txt-node) "AgentScript")
+              (and (= (v/vnode-tag btn-node) "button")
+                   (and (not (v/vnode-is-comp? btn-node))
+                        (and (v/vnode-is-comp? comp-node)
+                             (and (v/vnode-is-comp? comp-plain)
+                                  (and (= (v/vnode-tag comp-node) "Card")
+                                       (= (list-length (v/vnode-children comp-node)) 1))))))))))
+
+(df test-component-jsx-emission [] -> Bool
+  :d "Verifies JSX/TSX emission for components, native void elements, and event handlers"
+  (let [(empty-card (v/comp-plain "Card" (list)))
+        (jsx-card (j/emit-vnode-jsx empty-card 0))
+        (btn-node (v/elem "button" (map-set (map-set (map-empty) "class" "btn") "disabled" "true") (list (v/t "Submit"))))
+        (jsx-btn (j/emit-vnode-jsx btn-node 0))]
+    (and (string-contains? jsx-card "<Card  />")
+         (and (string-contains? jsx-btn "<button className=\"btn\" disabled>")
+              (string-contains? jsx-btn "Submit")))))
+
 (df run-tests [] -> Bool
   :d "Runs all VDOM and dual perception unit tests"
   (and (test-vnode-creation)
@@ -108,5 +135,7 @@
             (and (test-downsampling-prunes-scripts-and-styles)
                  (and (test-downsampling-filter-attributes)
                       (and (test-downsampling-collapses-wrappers)
-                           (test-dom-diff-added-removed-mutated)))))))
+                           (and (test-dom-diff-added-removed-mutated)
+                                (and (test-compact-nodes)
+                                     (test-component-jsx-emission)))))))))
 

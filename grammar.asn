@@ -32,9 +32,14 @@
     (:sym :name "d" :kind :fn :tokens 1)
     (:sym :name "s" :kind :fn :tokens 1)
     (:sym :name "b" :kind :fn :tokens 1)
+    (:sym :name "btn" :kind :fn :tokens 1)
     (:sym :name "txt" :kind :fn :tokens 1)
+    (:sym :name "t" :kind :fn :tokens 1)
     (:sym :name "text" :kind :fn :tokens 1)
     (:sym :name "elem" :kind :fn :tokens 1)
+    (:sym :name "el" :kind :fn :tokens 1)
+    (:sym :name "comp" :kind :fn :tokens 1)
+    (:sym :name "c" :kind :fn :tokens 1)
 
     ;; 2-Token Symbols (with :rationale)
     (:sym :name "render-card" :kind :fn :tokens 2
@@ -107,8 +112,20 @@
           :rationale "Short alias for span-plain")
     (:sym :name "b-plain" :kind :fn :tokens 2
           :rationale "Short alias for button-plain")
+    (:sym :name "btn-plain" :kind :fn :tokens 2
+          :rationale "Short alias for button-plain")
+    (:sym :name "t-plain" :kind :fn :tokens 2
+          :rationale "Constructs plain text VNode without formatting")
+    (:sym :name "el-plain" :kind :fn :tokens 2
+          :rationale "Constructs element VNode without attributes")
     (:sym :name "elem-plain" :kind :fn :tokens 2
           :rationale "Constructs generic VNode element without attributes")
+    (:sym :name "comp-plain" :kind :fn :tokens 2
+          :rationale "Constructs component VNode without props")
+    (:sym :name "c-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for comp-plain")
+    (:sym :name "vnode-attrs" :kind :fn :tokens 2
+          :rationale "Extracts attributes or props map from VNode")
     (:sym :name "vnode-tag" :kind :fn :tokens 2
           :rationale "Extracts tag string from VNode")
     (:sym :name "vnode-text" :kind :fn :tokens 2
@@ -151,6 +168,10 @@
           :rationale "Converts HTML attribute names to React camelCase JSX props")
     (:sym :name "is-void-tag?" :kind :fn :tokens 3
           :rationale "Predicate checking if HTML tag is void self-closing element")
+    (:sym :name "is-component-tag?" :kind :fn :tokens 3
+          :rationale "Predicate testing if tag is a custom React component")
+    (:sym :name "vnode-is-comp?" :kind :fn :tokens 3
+          :rationale "Predicate testing if VNode represents a component")
     (:sym :name "props-to-attrs" :kind :fn :tokens 3
           :rationale "Converts Props dictionary to list of HTML attribute strings")
     (:sym :name "is-valid-node" :kind :fn :tokens 3
@@ -199,4 +220,8 @@
           :rationale "Verifies redundant single-child wrapper collapse")
     (:sym :name "test-dom-diff-added-removed-mutated" :kind :fn :tokens 6
           :rationale "Verifies DOM patch generation for additions, deletions, and mutations")
+    (:sym :name "test-compact-nodes" :kind :fn :tokens 3
+          :rationale "Verifies compact text element and component constructors")
+    (:sym :name "test-component-jsx-emission" :kind :fn :tokens 4
+          :rationale "Verifies TSX emission for native elements and components")
   ])
