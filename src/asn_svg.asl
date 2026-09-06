@@ -38,9 +38,9 @@
         (h (extract-attr attrs "h" "100"))
         (rx (extract-attr attrs "rx" "0"))
         (ry (extract-attr attrs "ry" rx))
-        (f (extract-attr attrs "f" "none"))
-        (s (extract-attr attrs "s" "none"))
-        (sw (extract-attr attrs "sw" "1"))
+        (f (extract-attr attrs "f" (extract-attr attrs "fill" "none")))
+        (s (extract-attr attrs "s" (extract-attr attrs "stroke" "none")))
+        (sw (extract-attr attrs "sw" (extract-attr attrs "stroke-width" "1")))
         (r-attrs (if (= rx "0") "" (str " rx=\"" rx "\" ry=\"" ry "\"")))]
     (str "<rect x=\"" x "\" y=\"" y "\" width=\"" w "\" height=\"" h "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\"" r-attrs " />")))
 
@@ -50,9 +50,9 @@
         (cx (extract-attr attrs "cx" "160"))
         (cy (extract-attr attrs "cy" "160"))
         (r (extract-attr attrs "r" "50"))
-        (f (extract-attr attrs "f" "none"))
-        (s (extract-attr attrs "s" "none"))
-        (sw (extract-attr attrs "sw" "1"))]
+        (f (extract-attr attrs "f" (extract-attr attrs "fill" "none")))
+        (s (extract-attr attrs "s" (extract-attr attrs "stroke" "none")))
+        (sw (extract-attr attrs "sw" (extract-attr attrs "stroke-width" "1")))]
     (str "<circle cx=\"" cx "\" cy=\"" cy "\" r=\"" r "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" />")))
 
 (df render-line [(node SvgNode)] -> Str
@@ -62,30 +62,30 @@
         (y1 (extract-attr attrs "y1" "0"))
         (x2 (extract-attr attrs "x2" "100"))
         (y2 (extract-attr attrs "y2" "100"))
-        (s (extract-attr attrs "s" "#38bdf8"))
-        (sw (extract-attr attrs "sw" "2"))]
+        (s (extract-attr attrs "s" (extract-attr attrs "stroke" "#38bdf8")))
+        (sw (extract-attr attrs "sw" (extract-attr attrs "stroke-width" "2")))]
     (str "<line x1=\"" x1 "\" y1=\"" y1 "\" x2=\"" x2 "\" y2=\"" y2 "\" stroke=\"" s "\" stroke-width=\"" sw "\" stroke-linecap=\"round\" />")))
 
 (df render-polygon [(node SvgNode)] -> Str
   :d "Renders ASN :poly polygon to SVG <polygon> with fallback visible stroke"
   (let [(attrs (.-attrs node))
-        (pts (extract-attr attrs "points" (extract-attr attrs "pts" "")))
-        (has-f (has-attr? attrs "f"))
-        (has-s (has-attr? attrs "s"))
-        (f (if has-f (extract-attr attrs "f" "none") (if has-s "none" "rgba(56, 189, 248, 0.2)")))
-        (s (if has-s (extract-attr attrs "s" "none") (if has-f "none" "#38bdf8")))
-        (sw (extract-attr attrs "sw" "1"))]
+        (pts (extract-attr attrs "pts" (extract-attr attrs "points" "")))
+        (has-f (or (has-attr? attrs "f") (has-attr? attrs "fill")))
+        (has-s (or (has-attr? attrs "s") (has-attr? attrs "stroke")))
+        (f (if has-f (extract-attr attrs "f" (extract-attr attrs "fill" "none")) (if has-s "none" "rgba(56, 189, 248, 0.2)")))
+        (s (if has-s (extract-attr attrs "s" (extract-attr attrs "stroke" "none")) (if has-f "none" "#38bdf8")))
+        (sw (extract-attr attrs "sw" (extract-attr attrs "stroke-width" "1")))]
     (str "<polygon points=\"" pts "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" />")))
 
 (df render-path [(node SvgNode)] -> Str
   :d "Renders ASN :p path to SVG <path> with fallback visible stroke"
   (let [(attrs (.-attrs node))
         (d (extract-attr attrs "d" ""))
-        (has-f (has-attr? attrs "f"))
-        (has-s (has-attr? attrs "s"))
-        (f (if has-f (extract-attr attrs "f" "none") "none"))
-        (s (if has-s (extract-attr attrs "s" "none") (if has-f "none" "#38bdf8")))
-        (sw (extract-attr attrs "sw" "2"))]
+        (has-f (or (has-attr? attrs "f") (has-attr? attrs "fill")))
+        (has-s (or (has-attr? attrs "s") (has-attr? attrs "stroke")))
+        (f (if has-f (extract-attr attrs "f" (extract-attr attrs "fill" "none")) "none"))
+        (s (if has-s (extract-attr attrs "s" (extract-attr attrs "stroke" "none")) (if has-f "none" "#38bdf8")))
+        (sw (extract-attr attrs "sw" (extract-attr attrs "stroke-width" "2")))]
     (str "<path d=\"" d "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />")))
 
 (df render-text [(node SvgNode)] -> Str
