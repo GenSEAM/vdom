@@ -29,10 +29,26 @@
     (:sym :name "form" :kind :fn :tokens 1)
     (:sym :name "header" :kind :fn :tokens 1)
     (:sym :name "footer" :kind :fn :tokens 1)
+    (:sym :name "section" :kind :fn :tokens 1)
+    (:sym :name "nav" :kind :fn :tokens 1)
+    (:sym :name "main" :kind :fn :tokens 1)
+    (:sym :name "article" :kind :fn :tokens 1)
+    (:sym :name "aside" :kind :fn :tokens 1)
+    (:sym :name "table" :kind :fn :tokens 1)
+    (:sym :name "label" :kind :fn :tokens 1)
     (:sym :name "d" :kind :fn :tokens 1)
     (:sym :name "s" :kind :fn :tokens 1)
+    (:sym :name "sp" :kind :fn :tokens 1)
     (:sym :name "b" :kind :fn :tokens 1)
     (:sym :name "btn" :kind :fn :tokens 1)
+    (:sym :name "sec" :kind :fn :tokens 1)
+    (:sym :name "hdr" :kind :fn :tokens 1)
+    (:sym :name "ftr" :kind :fn :tokens 1)
+    (:sym :name "frm" :kind :fn :tokens 1)
+    (:sym :name "inp" :kind :fn :tokens 1)
+    (:sym :name "art" :kind :fn :tokens 1)
+    (:sym :name "tbl" :kind :fn :tokens 1)
+    (:sym :name "lbl" :kind :fn :tokens 1)
     (:sym :name "txt" :kind :fn :tokens 1)
     (:sym :name "t" :kind :fn :tokens 1)
     (:sym :name "text" :kind :fn :tokens 1)
@@ -126,6 +142,34 @@
           :rationale "Compact alias for comp-plain")
     (:sym :name "vnode-attrs" :kind :fn :tokens 2
           :rationale "Extracts attributes or props map from VNode")
+    (:sym :name "section-plain" :kind :fn :tokens 2
+          :rationale "Constructs section element without attributes")
+    (:sym :name "sec-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for section-plain")
+    (:sym :name "sp-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for span-plain")
+    (:sym :name "nav-plain" :kind :fn :tokens 2
+          :rationale "Constructs nav element without attributes")
+    (:sym :name "main-plain" :kind :fn :tokens 2
+          :rationale "Constructs main element without attributes")
+    (:sym :name "article-plain" :kind :fn :tokens 2
+          :rationale "Constructs article element without attributes")
+    (:sym :name "art-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for article-plain")
+    (:sym :name "table-plain" :kind :fn :tokens 2
+          :rationale "Constructs table element without attributes")
+    (:sym :name "tbl-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for table-plain")
+    (:sym :name "label-plain" :kind :fn :tokens 2
+          :rationale "Constructs label element without attributes")
+    (:sym :name "lbl-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for label-plain")
+    (:sym :name "hdr-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for header-plain")
+    (:sym :name "ftr-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for footer-plain")
+    (:sym :name "frm-plain" :kind :fn :tokens 2
+          :rationale "Compact alias for form-plain")
     (:sym :name "vnode-tag" :kind :fn :tokens 2
           :rationale "Extracts tag string from VNode")
     (:sym :name "vnode-text" :kind :fn :tokens 2

@@ -104,19 +104,25 @@
                    (string-contains? frame "(! dom/diff :route \"/settings\""))))))
 
 (df test-compact-nodes [] -> Bool
-  :d "Verifies ultra-compact t, el, btn, c, comp constructors and predicates"
+  :d "Verifies ultra-compact t, el, btn, c, comp, sec, sp, hdr constructors and predicates"
   (let [(txt-node (v/t "AgentScript"))
         (btn-node (h/btn (h/attrs-of (list (h/attr-id "b1"))) (list txt-node)))
-        (comp-node (h/c "Card" (h/attrs-of (list (h/attr-class "p-4"))) (list btn-node)))
+        (sec-node (h/sec-plain (list btn-node)))
+        (sp-node (h/sp-plain (list txt-node)))
+        (hdr-node (h/hdr-plain (list sp-node)))
+        (comp-node (h/c "Card" (h/attrs-of (list (h/attr-class "p-4"))) (list hdr-node)))
         (comp-plain (h/c-plain "Hero" (list txt-node)))]
     (and (v/is-valid-node txt-node)
          (and (= (v/vnode-text txt-node) "AgentScript")
               (and (= (v/vnode-tag btn-node) "button")
-                   (and (not (v/vnode-is-comp? btn-node))
-                        (and (v/vnode-is-comp? comp-node)
-                             (and (v/vnode-is-comp? comp-plain)
-                                  (and (= (v/vnode-tag comp-node) "Card")
-                                       (= (list-length (v/vnode-children comp-node)) 1))))))))))
+                   (and (= (v/vnode-tag sec-node) "section")
+                        (and (= (v/vnode-tag sp-node) "span")
+                             (and (= (v/vnode-tag hdr-node) "header")
+                                  (and (not (v/vnode-is-comp? btn-node))
+                                       (and (v/vnode-is-comp? comp-node)
+                                            (and (v/vnode-is-comp? comp-plain)
+                                                 (and (= (v/vnode-tag comp-node) "Card")
+                                                      (= (list-length (v/vnode-children comp-node)) 1)))))))))))))
 
 (df test-component-jsx-emission [] -> Bool
   :d "Verifies JSX/TSX emission for components, native void elements, and event handlers"
