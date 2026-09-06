@@ -1,0 +1,202 @@
+;; Package Grammar & Exported Symbol Registry (ASN)
+;; @genseam/asl-vdom
+(:grammar
+  :package @genseam/asl-vdom
+  :version "0.1.0"
+  :tokens-baseline 1
+  :symbols [
+    ;; 1-Token Symbols (Baseline)
+    (:sym :name "VNode" :kind :type :tokens 1)
+    (:sym :name "AXNode" :kind :type :tokens 1)
+    (:sym :name "AXFrame" :kind :type :tokens 1)
+    (:sym :name "MutationRecord" :kind :type :tokens 1)
+    (:sym :name "DomDiff" :kind :type :tokens 1)
+    (:sym :name "Props" :kind :type :tokens 1)
+    (:sym :name "CardProps" :kind :type :tokens 1)
+    (:sym :name "Particle" :kind :type :tokens 1)
+    (:sym :name "Spring" :kind :type :tokens 1)
+    (:sym :name "Force2D" :kind :type :tokens 1)
+    (:sym :name "card" :kind :fn :tokens 1)
+    (:sym :name "attr" :kind :fn :tokens 1)
+    (:sym :name "div" :kind :fn :tokens 1)
+    (:sym :name "span" :kind :fn :tokens 1)
+    (:sym :name "p" :kind :fn :tokens 1)
+    (:sym :name "h1" :kind :fn :tokens 1)
+    (:sym :name "h2" :kind :fn :tokens 1)
+    (:sym :name "h3" :kind :fn :tokens 1)
+    (:sym :name "button" :kind :fn :tokens 1)
+    (:sym :name "input" :kind :fn :tokens 1)
+    (:sym :name "form" :kind :fn :tokens 1)
+    (:sym :name "header" :kind :fn :tokens 1)
+    (:sym :name "footer" :kind :fn :tokens 1)
+    (:sym :name "d" :kind :fn :tokens 1)
+    (:sym :name "s" :kind :fn :tokens 1)
+    (:sym :name "b" :kind :fn :tokens 1)
+    (:sym :name "txt" :kind :fn :tokens 1)
+    (:sym :name "text" :kind :fn :tokens 1)
+    (:sym :name "elem" :kind :fn :tokens 1)
+
+    ;; 2-Token Symbols (with :rationale)
+    (:sym :name "render-card" :kind :fn :tokens 2
+          :rationale "Renders Card component VNode tree from CardProps")
+    (:sym :name "make-particle" :kind :fn :tokens 2
+          :rationale "Initializes 2D physics particle with position and velocity")
+    (:sym :name "coulomb-repulsion" :kind :fn :tokens 2
+          :rationale "Calculates electrostatic repulsive force vector between nodes")
+    (:sym :name "euler-integrate" :kind :fn :tokens 2
+          :rationale "Integrates velocity and acceleration for 2D spring-mass simulation step")
+    (:sym :name "downsample-tree" :kind :fn :tokens 2
+          :rationale "Compresses DOM accessibility tree removing decorative noise")
+    (:sym :name "emit-component" :kind :fn :tokens 2
+          :rationale "Emits compiled component code across polyglot frontend targets")
+    (:sym :name "indent-spaces" :kind :fn :tokens 2
+          :rationale "Generates indentation whitespace buffer for code emission")
+    (:sym :name "make-props" :kind :fn :tokens 2
+          :rationale "Constructs Props dictionary from key-value attribute list")
+    (:sym :name "attrs-empty" :kind :fn :tokens 2
+          :rationale "Returns empty Props record")
+    (:sym :name "attr-class" :kind :fn :tokens 2
+          :rationale "Constructs class attribute pair")
+    (:sym :name "attr-id" :kind :fn :tokens 2
+          :rationale "Constructs id attribute pair")
+    (:sym :name "attr-type" :kind :fn :tokens 2
+          :rationale "Constructs type attribute pair")
+    (:sym :name "attr-value" :kind :fn :tokens 2
+          :rationale "Constructs value attribute pair")
+    (:sym :name "attr-name" :kind :fn :tokens 2
+          :rationale "Constructs name attribute pair")
+    (:sym :name "attr-placeholder" :kind :fn :tokens 2
+          :rationale "Constructs placeholder attribute pair")
+    (:sym :name "attr-href" :kind :fn :tokens 2
+          :rationale "Constructs href attribute pair")
+    (:sym :name "attr-src" :kind :fn :tokens 2
+          :rationale "Constructs src attribute pair")
+    (:sym :name "attr-alt" :kind :fn :tokens 2
+          :rationale "Constructs alt attribute pair")
+    (:sym :name "attrs-of" :kind :fn :tokens 2
+          :rationale "Constructs Props record from attribute list")
+    (:sym :name "with-attr" :kind :fn :tokens 2
+          :rationale "Associates additional attribute key-value pair to Props record")
+    (:sym :name "with-class" :kind :fn :tokens 2
+          :rationale "Appends CSS class token to Props record")
+    (:sym :name "div-plain" :kind :fn :tokens 2
+          :rationale "Constructs div element without attributes")
+    (:sym :name "span-plain" :kind :fn :tokens 2
+          :rationale "Constructs span element without attributes")
+    (:sym :name "p-plain" :kind :fn :tokens 2
+          :rationale "Constructs p element without attributes")
+    (:sym :name "h1-plain" :kind :fn :tokens 2
+          :rationale "Constructs h1 element without attributes")
+    (:sym :name "h2-plain" :kind :fn :tokens 2
+          :rationale "Constructs h2 element without attributes")
+    (:sym :name "h3-plain" :kind :fn :tokens 2
+          :rationale "Constructs h3 element without attributes")
+    (:sym :name "button-plain" :kind :fn :tokens 2
+          :rationale "Constructs button element without attributes")
+    (:sym :name "form-plain" :kind :fn :tokens 2
+          :rationale "Constructs form element without attributes")
+    (:sym :name "card-plain" :kind :fn :tokens 2
+          :rationale "Constructs card element without attributes")
+    (:sym :name "header-plain" :kind :fn :tokens 2
+          :rationale "Constructs header element without attributes")
+    (:sym :name "footer-plain" :kind :fn :tokens 2
+          :rationale "Constructs footer element without attributes")
+    (:sym :name "d-plain" :kind :fn :tokens 2
+          :rationale "Short alias for div-plain")
+    (:sym :name "s-plain" :kind :fn :tokens 2
+          :rationale "Short alias for span-plain")
+    (:sym :name "b-plain" :kind :fn :tokens 2
+          :rationale "Short alias for button-plain")
+    (:sym :name "elem-plain" :kind :fn :tokens 2
+          :rationale "Constructs generic VNode element without attributes")
+    (:sym :name "vnode-tag" :kind :fn :tokens 2
+          :rationale "Extracts tag string from VNode")
+    (:sym :name "vnode-text" :kind :fn :tokens 2
+          :rationale "Extracts text content from VNode")
+    (:sym :name "vnode-children" :kind :fn :tokens 2
+          :rationale "Extracts children list from VNode")
+    (:sym :name "ax-leaf" :kind :fn :tokens 2
+          :rationale "Constructs accessibility tree leaf node without children")
+    (:sym :name "filter-attributes" :kind :fn :tokens 2
+          :rationale "Filters Props removing non-standard DOM attributes")
+    (:sym :name "downsample-node" :kind :fn :tokens 2
+          :rationale "Downsamples individual AST/DOM node for agent perception")
+    (:sym :name "downsample-children" :kind :fn :tokens 2
+          :rationale "Downsamples child node list recursively")
+    (:sym :name "diff-attributes" :kind :fn :tokens 2
+          :rationale "Computes attribute delta between old and new VNode")
+    (:sym :name "diff-nodes" :kind :fn :tokens 2
+          :rationale "Computes structural mutation diff between two VNodes")
+    (:sym :name "partition-diff" :kind :fn :tokens 2
+          :rationale "Partitions diff operations into additions, deletions, and updates")
+    (:sym :name "dom-diff" :kind :fn :tokens 2
+          :rationale "Calculates minimum mutation graph between two DOM trees")
+    (:sym :name "compile-component" :kind :fn :tokens 2
+          :rationale "Compiles declarative VDOM component into target framework syntax")
+    (:sym :name "run-tests" :kind :fn :tokens 2
+          :rationale "Executes unit test suite")
+
+    ;; >2 Token Symbols (with :rationale)
+    (:sym :name "hooke-spring-force" :kind :fn :tokens 3
+          :rationale "Calculates Hooke law elastic spring force between connected nodes")
+    (:sym :name "make-ax-frame" :kind :fn :tokens 3
+          :rationale "Constructs complete accessibility perception frame")
+    (:sym :name "emit-vnode-jsx" :kind :fn :tokens 3
+          :rationale "Serializes VNode tree into JSX expression syntax")
+    (:sym :name "emit-jsx-attrs" :kind :fn :tokens 3
+          :rationale "Serializes attribute dictionary into JSX attribute string")
+    (:sym :name "emit-tsx-module" :kind :fn :tokens 3
+          :rationale "Emits self-contained React TypeScript .tsx module")
+    (:sym :name "jsx-attr-key" :kind :fn :tokens 3
+          :rationale "Converts HTML attribute names to React camelCase JSX props")
+    (:sym :name "is-void-tag?" :kind :fn :tokens 3
+          :rationale "Predicate checking if HTML tag is void self-closing element")
+    (:sym :name "props-to-attrs" :kind :fn :tokens 3
+          :rationale "Converts Props dictionary to list of HTML attribute strings")
+    (:sym :name "is-valid-node" :kind :fn :tokens 3
+          :rationale "Validates structural integrity of VNode")
+    (:sym :name "make-ax-node" :kind :fn :tokens 3
+          :rationale "Constructs accessibility tree node with role and bounding box")
+    (:sym :name "is-retained-attr?" :kind :fn :tokens 3
+          :rationale "Predicate testing if attribute is semantic and must be retained in downsampling")
+    (:sym :name "should-prune-tag?" :kind :fn :tokens 3
+          :rationale "Predicate testing if tag is non-content decorative boilerplate")
+    (:sym :name "is-redundant-wrapper?" :kind :fn :tokens 3
+          :rationale "Predicate testing if container element can be collapsed without losing semantics")
+    (:sym :name "diff-children-indexed" :kind :fn :tokens 3
+          :rationale "Computes indexed children diff using key reconciliation")
+    (:sym :name "format-diff-frame" :kind :fn :tokens 3
+          :rationale "Formats DomDiff into human-readable compact patch frame")
+    (:sym :name "emit-react-tsx" :kind :fn :tokens 3
+          :rationale "Emits complete React 19 component file")
+    (:sym :name "emit-vue-sfc" :kind :fn :tokens 3
+          :rationale "Emits Vue 3 Single File Component markup")
+    (:sym :name "emit-svelte-component" :kind :fn :tokens 3
+          :rationale "Emits Svelte 5 runes component markup")
+    (:sym :name "emit-ssr-html" :kind :fn :tokens 3
+          :rationale "Renders VNode tree into server-side HTML string")
+    (:sym :name "vue-attr-key" :kind :fn :tokens 3
+          :rationale "Converts attribute name to Vue template binding syntax")
+    (:sym :name "svelte-attr-key" :kind :fn :tokens 3
+          :rationale "Converts attribute name to Svelte template syntax")
+    (:sym :name "html-attr-key" :kind :fn :tokens 3
+          :rationale "Normalizes attribute key for standard HTML output")
+    (:sym :name "is-self-closing?" :kind :fn :tokens 3
+          :rationale "Predicate testing if tag requires self-closing delimiter in XML/HTML")
+    (:sym :name "test-coulomb-repulsion-direction" :kind :fn :tokens 4
+          :rationale "Verifies Coulomb repulsion vector polarity")
+    (:sym :name "test-euler-damping" :kind :fn :tokens 3
+          :rationale "Verifies Euler velocity decay under damping coefficient")
+    (:sym :name "test-vnode-creation" :kind :fn :tokens 3
+          :rationale "Verifies VNode element construction")
+    (:sym :name "test-axnode-construction" :kind :fn :tokens 3
+          :rationale "Verifies accessibility tree node construction")
+    (:sym :name "test-downsampling-prunes-scripts-and-styles" :kind :fn :tokens 6
+          :rationale "Verifies script and style tag pruning during downsampling")
+    (:sym :name "test-downsampling-filter-attributes" :kind :fn :tokens 4
+          :rationale "Verifies attribute filtering during tree compression")
+    (:sym :name "test-downsampling-collapses-wrappers" :kind :fn :tokens 4
+          :rationale "Verifies redundant single-child wrapper collapse")
+    (:sym :name "test-dom-diff-added-removed-mutated" :kind :fn :tokens 6
+          :rationale "Verifies DOM patch generation for additions, deletions, and mutations")
+  ])
