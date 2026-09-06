@@ -1,9 +1,6 @@
 (module asl-vdom/asn-svg
   :d "Pure AgentScript ASN Vector Graphics S-Expression Transpiler to W3C SVG"
-  :x [SvgNode SvgResult
-      make-svg-node render-svg-node asn-to-svg
-      render-rect render-circle render-line render-polygon render-path render-text
-      extract-attr has-attr?]
+  :x [SvgNode SvgResult asn-to-svg]
   :i [])
 
 (dfs SvgNode
@@ -44,8 +41,8 @@
         (f (extract-attr attrs "f" "none"))
         (s (extract-attr attrs "s" "none"))
         (sw (extract-attr attrs "sw" "1"))
-        (r-attrs (if (= rx "0") "" (string-concat " rx=\"" (string-concat rx (string-concat "\" ry=\"" (string-concat ry "\""))))))]
-    (string-concat "<rect x=\"" (string-concat x (string-concat "\" y=\"" (string-concat y (string-concat "\" width=\"" (string-concat w (string-concat "\" height=\"" (string-concat h (string-concat "\" fill=\"" (string-concat f (string-concat "\" stroke=\"" (string-concat s (string-concat "\" stroke-width=\"" (string-concat sw (string-concat "\"" (string-concat r-attrs " />")))))))))))))))))
+        (r-attrs (if (= rx "0") "" (str " rx=\"" rx "\" ry=\"" ry "\"")))]
+    (str "<rect x=\"" x "\" y=\"" y "\" width=\"" w "\" height=\"" h "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\"" r-attrs " />")))
 
 (df render-circle [(node SvgNode)] -> Str
   :d "Renders ASN :circ circle to SVG <circle>"
@@ -56,7 +53,7 @@
         (f (extract-attr attrs "f" "none"))
         (s (extract-attr attrs "s" "none"))
         (sw (extract-attr attrs "sw" "1"))]
-    (string-concat "<circle cx=\"" (string-concat cx (string-concat "\" cy=\"" (string-concat cy (string-concat "\" r=\"" (string-concat r (string-concat "\" fill=\"" (string-concat f (string-concat "\" stroke=\"" (string-concat s (string-concat "\" stroke-width=\"" (string-concat sw "\" />")))))))))))))))
+    (str "<circle cx=\"" cx "\" cy=\"" cy "\" r=\"" r "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" />")))
 
 (df render-line [(node SvgNode)] -> Str
   :d "Renders ASN :ln line to SVG <line>"
@@ -67,7 +64,7 @@
         (y2 (extract-attr attrs "y2" "100"))
         (s (extract-attr attrs "s" "#38bdf8"))
         (sw (extract-attr attrs "sw" "2"))]
-    (string-concat "<line x1=\"" (string-concat x1 (string-concat "\" y1=\"" (string-concat y1 (string-concat "\" x2=\"" (string-concat x2 (string-concat "\" y2=\"" (string-concat y2 (string-concat "\" stroke=\"" (string-concat s (string-concat "\" stroke-width=\"" (string-concat sw "\" stroke-linecap=\"round\" />")))))))))))))))
+    (str "<line x1=\"" x1 "\" y1=\"" y1 "\" x2=\"" x2 "\" y2=\"" y2 "\" stroke=\"" s "\" stroke-width=\"" sw "\" stroke-linecap=\"round\" />")))
 
 (df render-polygon [(node SvgNode)] -> Str
   :d "Renders ASN :poly polygon to SVG <polygon> with fallback visible stroke"
@@ -78,7 +75,7 @@
         (f (if has-f (extract-attr attrs "f" "none") (if has-s "none" "rgba(56, 189, 248, 0.2)")))
         (s (if has-s (extract-attr attrs "s" "none") (if has-f "none" "#38bdf8")))
         (sw (extract-attr attrs "sw" "1"))]
-    (string-concat "<polygon points=\"" (string-concat pts (string-concat "\" fill=\"" (string-concat f (string-concat "\" stroke=\"" (string-concat s (string-concat "\" stroke-width=\"" (string-concat sw "\" />"))))))))))
+    (str "<polygon points=\"" pts "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" />")))
 
 (df render-path [(node SvgNode)] -> Str
   :d "Renders ASN :p path to SVG <path> with fallback visible stroke"
@@ -89,7 +86,7 @@
         (f (if has-f (extract-attr attrs "f" "none") "none"))
         (s (if has-s (extract-attr attrs "s" "none") (if has-f "none" "#38bdf8")))
         (sw (extract-attr attrs "sw" "2"))]
-    (string-concat "<path d=\"" (string-concat d (string-concat "\" fill=\"" (string-concat f (string-concat "\" stroke=\"" (string-concat s (string-concat "\" stroke-width=\"" (string-concat sw "\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />"))))))))))
+    (str "<path d=\"" d "\" fill=\"" f "\" stroke=\"" s "\" stroke-width=\"" sw "\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />")))
 
 (df render-text [(node SvgNode)] -> Str
   :d "Renders ASN :txt text element to SVG <text>"
@@ -99,7 +96,7 @@
         (f (extract-attr attrs "f" "#ffffff"))
         (sz (extract-attr attrs "sz" "14"))
         (txt (extract-attr attrs "text" (extract-attr attrs "t" (.-text-content node))))]
-    (string-concat "<text x=\"" (string-concat x (string-concat "\" y=\"" (string-concat y (string-concat "\" fill=\"" (string-concat f (string-concat "\" font-size=\"" (string-concat sz (string-concat "\" font-family=\"system-ui, sans-serif\">" (string-concat txt "</text>"))))))))))))
+    (str "<text x=\"" x "\" y=\"" y "\" fill=\"" f "\" font-size=\"" sz "\" font-family=\"system-ui, sans-serif\">" txt "</text>")))
 
 (df render-svg-node [(node SvgNode)] -> Str
   :d "Recursively renders an SvgNode tree to valid W3C XML"
@@ -109,9 +106,9 @@
        (let [(attrs (.-attrs node))
              (w (extract-attr attrs "w" "320"))
              (h (extract-attr attrs "h" "320"))
-             (v (extract-attr attrs "v" (string-concat "0 0 " (string-concat w (string-concat " " h)))))
+             (v (extract-attr attrs "v" (str "0 0 " w " " h)))
              (children-xml (string-join "\n  " (list-map render-svg-node (.-children node))))]
-         (string-concat "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" (string-concat v (string-concat "\" width=\"100%\" height=\"100%\" preserveAspectRatio=\"xMidYMid meet\">\n  " (string-concat children-xml "\n</svg>")))))]
+         (str "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" v "\" width=\"100%\" height=\"100%\" preserveAspectRatio=\"xMidYMid meet\">\n  " children-xml "\n</svg>"))]
       [(= kind "rc") (render-rect node)]
       [(= kind "circ") (render-circle node)]
       [(= kind "ln") (render-line node)]
@@ -121,9 +118,9 @@
       [(= kind "g")
        (let [(attrs (.-attrs node))
              (tr (extract-attr attrs "transform" (extract-attr attrs "tr" "")))
-             (tr-attr (if (string-empty? tr) "" (string-concat " transform=\"" (string-concat tr "\""))))
+             (tr-attr (if (string-empty? tr) "" (str " transform=\"" tr "\"")))
              (children-xml (string-join "\n    " (list-map render-svg-node (.-children node))))]
-         (string-concat "<g" (string-concat tr-attr (string-concat ">\n    " (string-concat children-xml "\n  </g>")))))]
+         (str "<g" tr-attr ">\n    " children-xml "\n  </g>"))]
       [true ""])))
 
 (df asn-to-svg [(raw-asn Str)] -> SvgResult

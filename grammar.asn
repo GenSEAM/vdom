@@ -5,8 +5,10 @@
   :version "0.1.0"
   :tokens-baseline 1
   :symbols [
-    ;; 1-Token Symbols (Baseline)
     (:sym :name "VNode" :kind :type :tokens 1)
+    (:sym :name "SvgNode" :kind :type :tokens 1)
+    (:sym :name "SvgResult" :kind :type :tokens 1)
+    (:sym :name "asn-to-svg" :kind :fn :tokens 3 :rationale "Direct S-expression to W3C SVG transpiler")
     (:sym :name "AXNode" :kind :type :tokens 1)
     (:sym :name "AXFrame" :kind :type :tokens 1)
     (:sym :name "MutationRecord" :kind :type :tokens 1)

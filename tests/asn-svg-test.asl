@@ -1,6 +1,6 @@
 (module asl-vdom/tests/asn-svg-test
   :d "Unit tests for pure AgentScript ASN Vector Graphics Transpiler"
-  :x [test-render-rect test-render-circle test-render-poly-fallback test-render-path-fallback test-asn-to-svg run-tests]
+  :x [run-tests]
   :i [(asn_svg :a svg)])
 
 (df test-render-rect [] -> Bool
