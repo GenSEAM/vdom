@@ -54,6 +54,15 @@
                       (and (= (list-length children) 1)
                            (= (v/vnode-tag (mt (list-head children) ((some h) h) ((none) (v/text "")))) "h1")))))
               ((none) false)) "Downsampler must prune script, style, meta leaving main > h1")
+    (assert (v/should-prune-tag? "script") "Script tag must be marked for pruning")
+    (assert (v/should-prune-tag? "style") "Style tag must be marked for pruning")
+    (assert (not (v/should-prune-tag? "main")) "Semantic main tag must not be pruned")
+    (assert (not (v/should-prune-tag? "h1")) "Semantic h1 tag must not be pruned")
+    (assert (not (v/is-valid-node (v/elem "" (map-empty) (list)))) "Malformed tag with empty string must be invalid")
+    (assert (not (v/is-valid-node (v/text ""))) "Empty text node must be invalid")
+    (assert (not (v/is-retained-attr? "onclick")) "Non-semantic onclick attribute must not be retained")
+    (assert (list-empty? (v/downsample-children (list script-node style-node meta-node))) "Pruned tags must produce empty node list")
+    (assert (not (list-empty? (v/downsample-children (list content-node)))) "Content node list must not be empty after downsampling")
     true))
 
 (df test-downsampling-filter-attributes [] -> Bool
@@ -77,6 +86,12 @@
                (and (= (v/vnode-tag final-node) "button")
                     (= (v/vnode-text (mt (list-head (v/vnode-children final-node)) ((some h) h) ((none) (v/text "")))) "Action")))
               ((none) false)) "Downsampler must collapse wrappers to button")
+    (assert (v/is-redundant-wrapper? "div" (map-empty) 1) "Plain single-child div must be classified as redundant wrapper")
+    (assert (v/is-redundant-wrapper? "span" (map-empty) 1) "Plain single-child span must be classified as redundant wrapper")
+    (assert (not (v/is-redundant-wrapper? "button" (map-empty) 1)) "Semantic button element must not be classified as redundant wrapper")
+    (assert (not (v/is-redundant-wrapper? "div" (map-set (map-empty) "id" "act") 1)) "Wrapper with attributes must not be collapsed")
+    (assert (not (v/is-redundant-wrapper? "div" (map-empty) 2)) "Wrapper with multiple children must not be collapsed")
+    (assert (not (v/is-redundant-wrapper? "div" (map-empty) 0)) "Empty node wrapper must not be collapsed")
     true))
 
 (df test-dom-diff-added-removed-mutated [] -> Bool
