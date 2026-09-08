@@ -23,6 +23,7 @@
 
 (df run-tests [] -> Bool
   :d "Runs all physics reactor tests."
-  (let [(_t1 (test-coulomb-repulsion-direction))
-        (_t2 (test-euler-damping))]
-    true))
+  (and (test-coulomb-repulsion-direction)
+       (test-euler-damping)))
+
+(run-tests)

@@ -16,4 +16,7 @@
 
 (df downsample-tree [(raw Str)] -> Str
   :d "Downsamples raw DOM string into token-efficient ASN representation."
-  "(:ax-root (:node @e1 :role \"button\" :name \"Submit\"))")
+  (let [(clean (string-trim raw))]
+    (if (string-empty? clean)
+      "(:ax-root)"
+      (str "(:ax-root (:node :content \"" clean "\"))"))))

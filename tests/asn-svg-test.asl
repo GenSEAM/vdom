@@ -51,9 +51,10 @@
 
 (df run-tests [] -> Bool
   :d "Executes all test cases in suite"
-  (let [(_t1 (test-render-rect))
-        (_t2 (test-render-circle))
-        (_t3 (test-render-poly-fallback))
-        (_t4 (test-render-path-fallback))
-        (_t5 (test-asn-to-svg))]
-    true))
+  (and (test-render-rect)
+       (test-render-circle)
+       (test-render-poly-fallback)
+       (test-render-path-fallback)
+       (test-asn-to-svg)))
+
+(run-tests)

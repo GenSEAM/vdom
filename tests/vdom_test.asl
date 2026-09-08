@@ -130,13 +130,14 @@
 
 (df run-tests [] -> Bool
   :d "Runs all VDOM and dual perception unit tests"
-  (let [(_t1 (test-vnode-creation))
-        (_t2 (test-axnode-construction))
-        (_t3 (test-downsampling-prunes-scripts-and-styles))
-        (_t4 (test-downsampling-filter-attributes))
-        (_t5 (test-downsampling-collapses-wrappers))
-        (_t6 (test-dom-diff-added-removed-mutated))
-        (_t7 (test-compact-nodes))
-        (_t8 (test-component-jsx-emission))]
-    true))
+  (and (test-vnode-creation)
+       (test-axnode-construction)
+       (test-downsampling-prunes-scripts-and-styles)
+       (test-downsampling-filter-attributes)
+       (test-downsampling-collapses-wrappers)
+       (test-dom-diff-added-removed-mutated)
+       (test-compact-nodes)
+       (test-component-jsx-emission)))
+
+(run-tests)
 
