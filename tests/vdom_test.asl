@@ -27,11 +27,11 @@
 
 (df test-axnode-construction [] -> Bool
   :d "Verifies AXNode accessibility tree node construction and state tracking"
-  (let [(leaf (v/ax-leaf "button" "Deploy" "@e1"))
-        (parent (v/make-ax-node "dialog" "Confirmation" "@e0" "Modal dialog" false true (list leaf)))]
+  (let [(leaf (v/ax-leaf "button" "Deploy" "e1"))
+        (parent (v/make-ax-node "dialog" "Confirmation" "e0" "Modal dialog" false true (list leaf)))]
     (assert (= (.-role leaf) "button") "Leaf role must be button")
     (assert (= (.-name leaf) "Deploy") "Leaf name must be Deploy")
-    (assert (= (.-ref leaf) "@e1") "Leaf ref must be @e1")
+    (assert (= (.-ref leaf) "e1") "Leaf ref must be e1")
     (assert (not (.-disabled leaf)) "Leaf must not be disabled")
     (assert (not (.-focused leaf)) "Leaf must not be focused")
     (assert (= (.-role parent) "dialog") "Parent role must be dialog")

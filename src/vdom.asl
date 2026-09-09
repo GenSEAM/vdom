@@ -18,7 +18,7 @@
 (dfs AXNode
   (:f role String "ARIA role or control role: button, link, heading, input")
   (:f name String "Accessible name or primary human label")
-  (:f ref String "Target element reference selector e.g. @e1, @e2")
+  (:f ref String "Target element reference selector e.g. e1, e2")
   (:f description String "Accessible description, hint, or tooltip")
   (:f disabled Bool "Whether element is currently disabled")
   (:f focused Bool "Whether element currently holds keyboard focus")

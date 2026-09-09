@@ -1,7 +1,7 @@
 ;; Package Grammar & Exported Symbol Registry (ASN)
-;; @genseam/asl-vdom
+;; asl-vdom
 (:grammar
-  :package @genseam/asl-vdom
+  :package asl-vdom
   :version "0.1.0"
   :tokens-baseline 1
   :symbols [
