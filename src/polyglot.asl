@@ -1,9 +1,11 @@
 (module asl-vdom/polyglot
-  :d "Universal Polyglot UI Transpiler: React 19 TSX, Vue 3 SFC, Svelte 5, and SSR HTML"
+  :d "Universal Polyglot UI Transpiler: React 19 TSX, Vue 3 SFC, Svelte 5, SSR HTML, SwiftUI 6, and Jetpack Compose"
   :x [emit-react-tsx
       emit-vue-sfc
       emit-svelte-component
       emit-ssr-html
+      emit-swiftui-view
+      emit-compose-composable
       compile-component
       vue-attr-key
       svelte-attr-key
@@ -127,11 +129,133 @@
   :d "Generates pure server-side rendered HTML"
   (emit-vnode "html" node 0))
 
+(df emit-swiftui-node [(node v/VNode) (indent Int64)] -> String
+  :d "Recursively lowers a VNode into idiomatic SwiftUI views"
+  (let [(pad (indent-spaces indent))]
+    (mt node
+      ((v/text-node content)
+       (str pad "Text(\"" content "\")"))
+      ((v/element-node tag attrs children)
+       (cond
+         ((= tag "platform-android") "")
+         ((= tag "platform-ios")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch indent)) children))]
+            (string-join ch-strs "\n")))
+         ((or (or (= tag "vstack") (= tag "stack")) (= tag "div"))
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "VStack(spacing: 8) {\n" body "\n" pad "}")))
+         ((= tag "hstack")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "HStack(spacing: 8) {\n" body "\n" pad "}")))
+         ((= tag "zstack")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "ZStack {\n" body "\n" pad "}")))
+         ((= tag "scroll")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "ScrollView {\n" body "\n" pad "}")))
+         ((= tag "button")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Button(action: {}) {\n" body "\n" pad "}")))
+         ((= tag "spacer")
+          (str pad "Spacer()"))
+         ((or (= tag "divider") (= tag "hr"))
+          (str pad "Divider()"))
+         ((or (or (= tag "text") (= tag "p")) (= tag "span"))
+          (if (= (list-length children) 0)
+              (str pad "Text(\"\")")
+              (let [(first-ch (mt (list-head children) ((some c) c) ((none) (v/text ""))))]
+                (mt first-ch
+                  ((v/text-node txt) (str pad "Text(\"" txt "\")"))
+                  ((v/element-node _ _ _) (emit-swiftui-node first-ch indent))))))
+         (:else
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-swiftui-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "VStack {\n" body "\n" pad "}"))))))))
+
+(df emit-swiftui-view [(name String) (node v/VNode)] -> String
+  :d "Emits a complete SwiftUI 6 View component struct"
+  (let [(view-body (emit-swiftui-node node 2))]
+    (str "// SwiftUI 6 Component\n"
+         "import SwiftUI\n\n"
+         "public struct " name "View: View {\n"
+         "    public init() {}\n\n"
+         "    public var body: some View {\n"
+         view-body "\n"
+         "    }\n"
+         "}\n")))
+
+(df emit-compose-node [(node v/VNode) (indent Int64)] -> String
+  :d "Recursively lowers a VNode into idiomatic Jetpack Compose composables"
+  (let [(pad (indent-spaces indent))]
+    (mt node
+      ((v/text-node content)
+       (str pad "Text(text = \"" content "\")"))
+      ((v/element-node tag attrs children)
+       (cond
+         ((= tag "platform-ios") "")
+         ((= tag "platform-android")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch indent)) children))]
+            (string-join ch-strs "\n")))
+         ((or (or (= tag "vstack") (= tag "stack")) (= tag "div"))
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Column {\n" body "\n" pad "}")))
+         ((= tag "hstack")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Row {\n" body "\n" pad "}")))
+         ((= tag "zstack")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Box {\n" body "\n" pad "}")))
+         ((= tag "scroll")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Column(modifier = Modifier.verticalScroll(rememberScrollState())) {\n" body "\n" pad "}")))
+         ((= tag "button")
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Button(onClick = {}) {\n" body "\n" pad "}")))
+         ((= tag "spacer")
+          (str pad "Spacer(modifier = Modifier.weight(1f))"))
+         ((or (= tag "divider") (= tag "hr"))
+          (str pad "HorizontalDivider()"))
+         ((or (or (= tag "text") (= tag "p")) (= tag "span"))
+          (if (= (list-length children) 0)
+              (str pad "Text(text = \"\")")
+              (let [(first-ch (mt (list-head children) ((some c) c) ((none) (v/text ""))))]
+                (mt first-ch
+                  ((v/text-node txt) (str pad "Text(text = \"" txt "\")"))
+                  ((v/element-node _ _ _) (emit-compose-node first-ch indent))))))
+         (:else
+          (let [(ch-strs (map (fn [(ch v/VNode)] -> String (emit-compose-node ch (+ indent 1))) children))
+                (body (string-join ch-strs "\n"))]
+            (str pad "Column {\n" body "\n" pad "}"))))))))
+
+(df emit-compose-composable [(name String) (node v/VNode)] -> String
+  :d "Emits a complete Jetpack Compose @Composable function"
+  (let [(view-body (emit-compose-node node 1))]
+    (str "// Jetpack Compose Component\n"
+         "import androidx.compose.runtime.Composable\n"
+         "import androidx.compose.foundation.layout.*\n"
+         "import androidx.compose.material3.*\n\n"
+         "@Composable\n"
+         "fun " name "() {\n"
+         view-body "\n"
+         "}\n")))
+
 (df compile-component [(target String) (name String) (props-type String) (node v/VNode)] -> String
-  :d "Dispatches compilation to the requested target (react, vue, svelte, html)"
+  :d "Dispatches compilation to the requested target (react, vue, svelte, html, swiftui, compose)"
   (cond
     ((= target "react") (emit-react-tsx name props-type node))
     ((= target "vue") (emit-vue-sfc name props-type node))
     ((= target "svelte") (emit-svelte-component name props-type node))
     ((= target "html") (emit-ssr-html node))
+    ((= target "swiftui") (emit-swiftui-view name node))
+    ((= target "compose") (emit-compose-composable name node))
     (:else (emit-ssr-html node))))

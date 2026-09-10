@@ -242,6 +242,10 @@
           :rationale "Emits Svelte 5 runes component markup")
     (:sym :name "emit-ssr-html" :kind :fn :tokens 3
           :rationale "Renders VNode tree into server-side HTML string")
+    (:sym :name "emit-swiftui-view" :kind :fn :tokens 3
+          :rationale "Emits complete SwiftUI 6 View struct from VNode tree")
+    (:sym :name "emit-compose-composable" :kind :fn :tokens 3
+          :rationale "Emits complete Jetpack Compose @Composable function from VNode tree")
     (:sym :name "vue-attr-key" :kind :fn :tokens 3
           :rationale "Converts attribute name to Vue template binding syntax")
     (:sym :name "svelte-attr-key" :kind :fn :tokens 3
@@ -270,4 +274,6 @@
           :rationale "Verifies compact text element and component constructors")
     (:sym :name "test-component-jsx-emission" :kind :fn :tokens 4
           :rationale "Verifies TSX emission for native elements and components")
+    (:sym :name "test-swiftui-and-compose-emission" :kind :fn :tokens 5
+          :rationale "Verifies SwiftUI and Jetpack Compose component emission from VNode AST")
   ])

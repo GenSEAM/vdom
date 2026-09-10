@@ -8,8 +8,9 @@
       test-downsampling-collapses-wrappers
       test-dom-diff-added-removed-mutated
       test-compact-nodes
-      test-component-jsx-emission]
-  :i [(vdom :a v) (html :a h) (emit-jsx :a j)])
+      test-component-jsx-emission
+      test-swiftui-and-compose-emission]
+  :i [(vdom :a v) (html :a h) (emit-jsx :a j) (polyglot :a poly)])
 
 (df test-vnode-creation [] -> Bool
   :d "Verifies VNode creation, validation, and content accessors"
@@ -143,6 +144,29 @@
     (assert (string-contains? jsx-btn "Submit") "Button JSX must contain Submit")
     true))
 
+(df test-swiftui-and-compose-emission [] -> Bool
+  :d "Verifies SwiftUI and Jetpack Compose emission from VNode AST"
+  (let [(btn-text (v/text "Submit"))
+        (btn (v/elem-plain "button" (list btn-text)))
+        (title (v/elem-plain "text" (list (v/text "Welcome"))))
+        (ios-item (v/elem-plain "platform-ios" (list (v/elem-plain "text" (list (v/text "iOS Only"))))))
+        (android-item (v/elem-plain "platform-android" (list (v/elem-plain "text" (list (v/text "Android Only"))))))
+        (stack (v/elem-plain "vstack" (list title btn ios-item android-item)))
+        (swift-code (poly/emit-swiftui-view "Login" stack))
+        (compose-code (poly/emit-compose-composable "Login" stack))]
+    (assert (string-contains? swift-code "struct LoginView: View") "SwiftUI struct must match")
+    (assert (string-contains? swift-code "VStack(spacing: 8)") "SwiftUI must emit VStack")
+    (assert (string-contains? swift-code "Button(action: {})") "SwiftUI must emit Button")
+    (assert (string-contains? swift-code "iOS Only") "SwiftUI must render iOS platform block")
+    (assert (not (string-contains? swift-code "Android Only")) "SwiftUI must omit Android platform block")
+    (assert (string-contains? compose-code "@Composable") "Compose must declare @Composable")
+    (assert (string-contains? compose-code "fun Login()") "Compose function must match")
+    (assert (string-contains? compose-code "Column {") "Compose must emit Column")
+    (assert (string-contains? compose-code "Button(onClick = {})") "Compose must emit Button")
+    (assert (string-contains? compose-code "Android Only") "Compose must render Android platform block")
+    (assert (not (string-contains? compose-code "iOS Only")) "Compose must omit iOS platform block")
+    true))
+
 (df run-tests [] -> Bool
   :d "Runs all VDOM and dual perception unit tests"
   (and (test-vnode-creation)
@@ -152,7 +176,8 @@
        (test-downsampling-collapses-wrappers)
        (test-dom-diff-added-removed-mutated)
        (test-compact-nodes)
-       (test-component-jsx-emission)))
+       (test-component-jsx-emission)
+       (test-swiftui-and-compose-emission)))
 
 (run-tests)
 
