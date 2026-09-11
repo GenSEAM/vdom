@@ -20,14 +20,14 @@
 
 (df extract-attr [(attrs (List (Pair Str Str))) (key Str) (default-val Str)] -> Str
   :d "Retrieves attribute value by key from pairs list, or returns default-val"
-  (let [(matches (list-filter (fn [(p (Pair Str Str))] (= (fst p) key)) attrs))]
-    (if (list-empty? matches)
-      default-val
-      (snd (list-head matches)))))
+  (let [(matches (filter (fn [(p (Pair Str Str))] (= (fst p) key)) attrs))]
+    (mt (list-head matches)
+      ((some p) (snd p))
+      ((none) default-val))))
 
 (df has-attr? [(attrs (List (Pair Str Str))) (key Str)] -> Bool
   :d "Returns true if attribute key exists in pairs list"
-  (not (list-empty? (list-filter (fn [(p (Pair Str Str))] (= (fst p) key)) attrs))))
+  (not (list-empty? (filter (fn [(p (Pair Str Str))] (= (fst p) key)) attrs))))
 
 (df render-rect [(node SvgNode)] -> Str
   :d "Renders ASN :rc rectangle to SVG <rect>"
@@ -107,7 +107,7 @@
              (w (extract-attr attrs "w" "320"))
              (h (extract-attr attrs "h" "320"))
              (v (extract-attr attrs "v" (str "0 0 " w " " h)))
-             (children-xml (string-join "\n  " (list-map render-svg-node (.-children node))))]
+             (children-xml (string-join "\n  " (map render-svg-node (.-children node))))]
          (str "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" v "\" width=\"100%\" height=\"100%\" preserveAspectRatio=\"xMidYMid meet\">\n  " children-xml "\n</svg>"))]
       [(= kind "rc") (render-rect node)]
       [(= kind "circ") (render-circle node)]
@@ -119,20 +119,79 @@
        (let [(attrs (.-attrs node))
              (tr (extract-attr attrs "transform" (extract-attr attrs "tr" "")))
              (tr-attr (if (string-empty? tr) "" (str " transform=\"" tr "\"")))
-             (children-xml (string-join "\n    " (list-map render-svg-node (.-children node))))]
+             (children-xml (string-join "\n    " (map render-svg-node (.-children node))))]
          (str "<g" tr-attr ">\n    " children-xml "\n  </g>"))]
       [true ""])))
 
+(df extract-val [(src Str) (key Str)] -> (Option Str)
+  :d "Extracts attribute value string after keyword in source fragment"
+  (mt (string-index-of src (str key " "))
+    ((none) (none))
+    ((some idx)
+     (let [(klen (string-length key))
+           (start (+ (+ idx klen) 1))
+           (tail (string-trim (option-or (string-slice src start (string-length src)) "")))]
+       (if (string-starts-with? tail "\""))
+         (let [(p (string-split tail "\""))
+               (val (option-or (list-head (list-drop p 1)) ""))]
+           (some val))
+         (let [(words (string-split tail " "))
+               (raw-val (option-or (list-head words) ""))
+               (clean-val (string-replace (string-replace (string-replace raw-val ")" "") "\n" "") "\t" ""))]
+           (if (string-empty? clean-val) (none) (some clean-val)))))))
+
+(df collect-attrs [(src Str) (keys (List Str))] -> (List (Pair Str Str))
+  :d "Collects present attribute key-value pairs from source fragment"
+  (fold (fn [(acc (List (Pair Str Str))) (k Str)]
+          (let [(k-clean (if (string-starts-with? k ":") (option-or (string-slice k 1 (string-length k)) k) k))]
+            (mt (extract-val src k)
+              ((some v) (list-append acc (list (pair k-clean v))))
+              ((none) acc))))
+        (list)
+        keys))
+
+(df parse-child-chunk [(chunk Str) (kind Str) (keys (List Str))] -> SvgNode
+  (let [(attrs (collect-attrs chunk keys))
+        (txt (mt (extract-val chunk ":text") ((some tv) tv) ((none) (mt (extract-val chunk ":t") ((some t2) t2) ((none) "")))))]
+    (SvgNode :kind kind :attrs attrs :children (list) :text-content txt)))
+
+(df extract-form-between [(src Str) (prefix Str)] -> (Option Str)
+  (mt (string-index-of src prefix)
+    ((none) (none))
+    ((some start-idx)
+     (let [(sub (option-or (string-slice src start-idx (string-length src)) ""))]
+       (mt (string-index-of sub ")")
+         ((none) (some sub))
+         ((some end-idx) (string-slice sub 0 (+ end-idx 1))))))))
+
+(df parse-all-children [(src Str)] -> (List SvgNode)
+  :d "Dynamically extracts child SVG nodes from ASN S-expression string"
+  (let [(rc-keys (list ":x" ":y" ":w" ":h" ":rx" ":ry" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
+        (circ-keys (list ":cx" ":cy" ":r" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
+        (ln-keys (list ":x1" ":y1" ":x2" ":y2" ":s" ":stroke" ":sw" ":stroke-width"))
+        (poly-keys (list ":pts" ":points" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
+        (p-keys (list ":d" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
+        (txt-keys (list ":x" ":y" ":f" ":fill" ":sz" ":size" ":text" ":t"))
+        (c1 (mt (extract-form-between src "(:rc ") ((some f) (list (parse-child-chunk f "rc" rc-keys))) ((none) (list))))
+        (c2 (mt (extract-form-between src "(:circ ") ((some f) (list-append c1 (list (parse-child-chunk f "circ" circ-keys)))) ((none) c1)))
+        (c3 (mt (extract-form-between src "(:ln ") ((some f) (list-append c2 (list (parse-child-chunk f "ln" ln-keys)))) ((none) c2)))
+        (c4 (mt (extract-form-between src "(:poly ") ((some f) (list-append c3 (list (parse-child-chunk f "poly" poly-keys)))) ((none) c3)))
+        (c5 (mt (extract-form-between src "(:p ") ((some f) (list-append c4 (list (parse-child-chunk f "p" p-keys)))) ((none) c4)))
+        (c6 (mt (extract-form-between src "(:txt ") ((some f) (list-append c5 (list (parse-child-chunk f "txt" txt-keys)))) ((none) c5)))]
+    c6))
+
 (df asn-to-svg [(raw-asn Str)] -> SvgResult
-  :d "Parses native ASN vector graphics S-expression and transpiles to SVG"
+  :d "Parses native ASN vector graphics S-expression and transpiles to SVG dynamically"
   (if (string-empty? raw-asn)
     (SvgResult :svg "" :success false :error-msg "Empty ASN input")
     (let [(clean (string-trim raw-asn))]
       (if (string-starts-with? clean "(:svg")
-        (let [(bg (SvgNode :kind "rc" :attrs (list (pair "x" "0") (pair "y" "0") (pair "w" "320") (pair "h" "320") (pair "rx" "24") (pair "f" "#090d16")) :children (list) :text-content ""))
-              (ring (SvgNode :kind "circ" :attrs (list (pair "cx" "160") (pair "cy" "160") (pair "r" "120") (pair "f" "none") (pair "s" "rgba(56, 189, 248, 0.3)") (pair "sw" "2")) :children (list) :text-content ""))
-              (facet (SvgNode :kind "poly" :attrs (list (pair "points" "160,70 230,125 200,215 120,215 90,125") (pair "f" "#1e293b") (pair "s" "#38bdf8") (pair "sw" "2")) :children (list) :text-content ""))
-              (root (SvgNode :kind "svg" :attrs (list (pair "w" "320") (pair "h" "320") (pair "v" "0 0 320 320")) :children (list bg ring facet) :text-content ""))
+        (let [(w-val (mt (extract-val clean ":w") ((some w) w) ((none) "320")))
+              (h-val (mt (extract-val clean ":h") ((some h) h) ((none) "320")))
+              (v-val (mt (extract-val clean ":v") ((some v) v) ((none) (str "0 0 " w-val " " h-val))))
+              (root-attrs (list (pair "w" w-val) (pair "h" h-val) (pair "v" v-val)))
+              (children (parse-all-children clean))
+              (root (SvgNode :kind "svg" :attrs root-attrs :children children :text-content ""))
               (xml (render-svg-node root))]
           (SvgResult :svg xml :success true :error-msg ""))
         (SvgResult :svg "" :success false :error-msg "Input must start with (:svg")))))
