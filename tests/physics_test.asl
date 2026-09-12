@@ -2,6 +2,7 @@
   :d "Unit test suite for graph physics reactor: repulsion, spring elasticity, and damping."
   :x [test-coulomb-repulsion-direction
       test-euler-damping
+      test-hooke-spring-linearity
       run-tests]
   :i [(physics-reactor :a pr)])
 
@@ -31,10 +32,24 @@
     (assert (not (= (.-vx p2) 10.0)) "Undamped velocity must not persist under damping factor 0.9")
     true))
 
+(df test-hooke-spring-linearity [] -> Bool
+  :d "Verifies Hooke spring restorative force displacement scales linearly with Euclidean distance."
+  (let [(p1 (pr/make-particle 0.0 0.0))
+        (p2 (pr/make-particle 10.0 0.0))
+        (f1 (pr/hooke-spring-force p1 p2 5.0 1.0))
+        (p3 (pr/make-particle 5.0 0.0))
+        (f0 (pr/hooke-spring-force p1 p3 5.0 1.0))]
+    (assert (> (.-fx f1) 0.0) "Spring force on p1 toward p2 must be positive in X")
+    (assert (= (.-fx f1) 50.0) "Spring force fx1 must equal 50.0 for dist 10, rest 5, k 1")
+    (assert (= (.-fy f1) 0.0) "Spring force fy1 must equal 0.0 for horizontal displacement")
+    (assert (= (.-fx f0) 0.0) "At equilibrium rest distance spring force fx must be zero")
+    true))
+
 (df run-tests [] -> Bool
   :d "Runs all physics reactor tests."
   (and (test-coulomb-repulsion-direction)
-       (test-euler-damping)))
+       (test-euler-damping)
+       (test-hooke-spring-linearity)))
 
 (run-tests)
 

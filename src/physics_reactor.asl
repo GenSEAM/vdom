@@ -42,7 +42,7 @@
   :d "Calculates Hooke linear spring restorative force along connecting edge."
   (let [(dx (- (.-x p2) (.-x p1)))
         (dy (- (.-y p2) (.-y p1)))
-        (dist (+ (* dx dx) (* dy dy)))
+        (dist (sqrt (+ (* dx dx) (* dy dy))))
         (displacement (- dist rest))]
     (Force2D :fx (* (* dx k) displacement) :fy (* (* dy k) displacement))))
 

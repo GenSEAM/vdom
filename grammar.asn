@@ -132,8 +132,6 @@
           :rationale "Short alias for button-plain")
     (:sym :name "btn-plain" :kind :fn :tokens 2
           :rationale "Short alias for button-plain")
-    (:sym :name "t-plain" :kind :fn :tokens 2
-          :rationale "Constructs plain text VNode without formatting")
     (:sym :name "el-plain" :kind :fn :tokens 2
           :rationale "Constructs element VNode without attributes")
     (:sym :name "elem-plain" :kind :fn :tokens 2

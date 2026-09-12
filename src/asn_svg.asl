@@ -1,6 +1,6 @@
 (module asl-vdom/asn-svg
   :d "Pure AgentScript ASN Vector Graphics S-Expression Transpiler to W3C SVG"
-  :x [SvgNode SvgResult asn-to-svg]
+  :x [SvgNode SvgResult asn-to-svg parse-all-children extract-forms-by-tag]
   :i [])
 
 (dfs SvgNode
@@ -155,14 +155,24 @@
         (txt (mt (extract-val chunk ":text") ((some tv) tv) ((none) (mt (extract-val chunk ":t") ((some t2) t2) ((none) "")))))]
     (SvgNode :kind kind :attrs attrs :children (list) :text-content txt)))
 
+(df extract-forms-by-tag [(src Str) (tag-or-prefix Str)] -> (List Str)
+  :d "Iteratively extracts all matching S-expression forms for a given tag or prefix"
+  (let [(prefix (if (string-starts-with? tag-or-prefix "(:") tag-or-prefix (str "(:" tag-or-prefix " ")))]
+    (mt (string-index-of src prefix)
+      ((none) (list))
+      ((some start-idx)
+       (let [(sub (option-or (string-slice src start-idx (string-length src)) ""))]
+         (mt (string-index-of sub ")")
+           ((none) (list sub))
+           ((some end-idx)
+            (let [(chunk (option-or (string-slice sub 0 (+ end-idx 1)) sub))
+                  (next-pos (+ start-idx (+ end-idx 1)))
+                  (rest (if (>= next-pos (string-length src)) "" (option-or (string-slice src next-pos (string-length src)) "")))]
+              (list-append (list chunk) (extract-forms-by-tag rest prefix))))))))))
+
 (df extract-form-between [(src Str) (prefix Str)] -> (Option Str)
-  (mt (string-index-of src prefix)
-    ((none) (none))
-    ((some start-idx)
-     (let [(sub (option-or (string-slice src start-idx (string-length src)) ""))]
-       (mt (string-index-of sub ")")
-         ((none) (some sub))
-         ((some end-idx) (string-slice sub 0 (+ end-idx 1))))))))
+  (let [(forms (extract-forms-by-tag src prefix))]
+    (list-head forms)))
 
 (df parse-all-children [(src Str)] -> (List SvgNode)
   :d "Dynamically extracts child SVG nodes from ASN S-expression string"
@@ -172,13 +182,23 @@
         (poly-keys (list ":pts" ":points" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
         (p-keys (list ":d" ":f" ":fill" ":s" ":stroke" ":sw" ":stroke-width"))
         (txt-keys (list ":x" ":y" ":f" ":fill" ":sz" ":size" ":text" ":t"))
-        (c1 (mt (extract-form-between src "(:rc ") ((some f) (list (parse-child-chunk f "rc" rc-keys))) ((none) (list))))
-        (c2 (mt (extract-form-between src "(:circ ") ((some f) (list-append c1 (list (parse-child-chunk f "circ" circ-keys)))) ((none) c1)))
-        (c3 (mt (extract-form-between src "(:ln ") ((some f) (list-append c2 (list (parse-child-chunk f "ln" ln-keys)))) ((none) c2)))
-        (c4 (mt (extract-form-between src "(:poly ") ((some f) (list-append c3 (list (parse-child-chunk f "poly" poly-keys)))) ((none) c3)))
-        (c5 (mt (extract-form-between src "(:p ") ((some f) (list-append c4 (list (parse-child-chunk f "p" p-keys)))) ((none) c4)))
-        (c6 (mt (extract-form-between src "(:txt ") ((some f) (list-append c5 (list (parse-child-chunk f "txt" txt-keys)))) ((none) c5)))]
-    c6))
+        (rc-forms (extract-forms-by-tag src "(:rc "))
+        (rc-nodes (map (fn [(f Str)] (parse-child-chunk f "rc" rc-keys)) rc-forms))
+        (circ-forms (extract-forms-by-tag src "(:circ "))
+        (circ-nodes (map (fn [(f Str)] (parse-child-chunk f "circ" circ-keys)) circ-forms))
+        (ln-forms (extract-forms-by-tag src "(:ln "))
+        (ln-nodes (map (fn [(f Str)] (parse-child-chunk f "ln" ln-keys)) ln-forms))
+        (poly-forms (extract-forms-by-tag src "(:poly "))
+        (poly-nodes (map (fn [(f Str)] (parse-child-chunk f "poly" poly-keys)) poly-forms))
+        (p-forms (extract-forms-by-tag src "(:p "))
+        (p-nodes (map (fn [(f Str)] (parse-child-chunk f "p" p-keys)) p-forms))
+        (txt-forms (extract-forms-by-tag src "(:txt "))
+        (txt-nodes (map (fn [(f Str)] (parse-child-chunk f "txt" txt-keys)) txt-forms))]
+    (list-append rc-nodes
+      (list-append circ-nodes
+        (list-append ln-nodes
+          (list-append poly-nodes
+            (list-append p-nodes txt-nodes)))))))
 
 (df asn-to-svg [(raw-asn Str)] -> SvgResult
   :d "Parses native ASN vector graphics S-expression and transpiles to SVG dynamically"

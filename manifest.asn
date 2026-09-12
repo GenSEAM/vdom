@@ -3,4 +3,14 @@
  :entry "src/vdom.asl"
  :description "Dual perception AXTree downsampling and reactive virtual DOM engine"
  :asl-first true
+ :modules [
+   "asl-vdom/asn-svg"
+   "asl-vdom/diagram"
+   "asl-vdom/emit-jsx"
+   "asl-vdom/html"
+   "asl-vdom/perception"
+   "asl-vdom/physics-reactor"
+   "asl-vdom/polyglot"
+   "asl-vdom/vdom"
+ ]
  :dependencies [])
