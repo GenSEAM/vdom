@@ -1,14 +1,5 @@
-# @genseam/vdom (ASL S-Expression Virtual DOM)
+# vdom
 
-Declarative S-Expression Virtual DOM renderer bridging React 19, Vue 3, Angular, and Svelte 5.
+Archived. Superseded by the asl-vdom package of the AgentScript monorepo.
 
-## Installation
-```bash
-asl get github.com/GenSEAM/vdom
-```
-
-## Usage
-Compiles declarative UI trees in S-expressions to React VDOM, Vue 3 h() render functions, and native WebAssembly DOM updates.
-
-## License
-MIT
+This code now lives in the AgentScript monorepo at [`packages/asl-vdom`](https://github.com/GenSEAM/asl/tree/main/packages/asl-vdom). The history here stops at the last push to this repository; current history is in [GenSEAM/asl](https://github.com/GenSEAM/asl). The site is [aslang.dev](https://aslang.dev).
